@@ -27,11 +27,11 @@ osPoolId  (ZigbnwkState_poolAttr_id);                  // Memory pool ID
 osPoolDef (datsWIFITrans_pool, 5, datsAttr_WIFITrans);  // Declare memory pool
 osPoolId  (WIFITrans_poolAttr_id);                   	 // Memory pool ID
 
-osPoolDef (threadDatsPass_pool, 6, stt_threadDatsPass);  // Declare memory pool
+osPoolDef (threadDatsPass_pool, 10, stt_threadDatsPass);  // Declare memory pool
 osPoolId  (threadDP_poolAttr_id);                   	 // Memory pool ID
-osMessageQDef(MsgBox_threadDP_Z2W, 3, &stt_threadDatsPass);   // Define message queue
+osMessageQDef(MsgBox_threadDP_Z2W, 5, &stt_threadDatsPass);   // Define message queue
 osMessageQId  mqID_threadDP_Z2W;
-osMessageQDef(MsgBox_threadDP_W2Z, 3, &stt_threadDatsPass);   // Define message queue
+osMessageQDef(MsgBox_threadDP_W2Z, 5, &stt_threadDatsPass);   // Define message queue
 osMessageQId  mqID_threadDP_W2Z;
 
 //typedef int32_t (*fun_UARTRecv)(void *data, uint32_t num);
@@ -827,7 +827,7 @@ bool ZigB_datsTX(uint8_t  UART_OBJ,
 	/*条件选择 远端（即接收端）响应确认*/
 	if(true == responseIF){
 	
-		if(TXCMP_FLG && ZigB_datsRX(UART_OBJ,local_datsRX,200)){
+		if(TXCMP_FLG && ZigB_datsRX(UART_OBJ,local_datsRX,200)){	/**注意调试合适的响应时间**/
 		
 			if(local_datsRX->datsSTT.stt_MSG.Addr_from == DstAddr && !memcmp(local_datsRX->datsSTT.stt_MSG.dats,ASR_datsDst,ASR_datsDstLen)){
 			
@@ -857,13 +857,13 @@ void ZigB_mainThread(uint8_t UART_OBJ){
 	
 	const u8 dats_kernelTXBUFLen = 80;
 	u8 dats_kernelTXBUF[dats_kernelTXBUFLen] = {0};
-	
-	const u16 ZigbDevDetect_Period = 1000;
-	u16 ZigbDevDetect_Count = ZigbDevDetect_Period;
+
+	osTimerId tid_ZigbDevDetect;
+	const u16 ZigbDevDetect_Period = 30;	//Zigbee节点设备链表被优化倒计时阈值（单位：秒），既定时间内未接收到节点设备数据，该节点将从链表中被优化移除
 	
 	u8 loop = 0;
 	
-	const u8 datsTX_devListLen = 60;			/*测试数据段*/
+	const u8 datsTX_devListLen = 60;			
 	u8 datsTX_devList[datsTX_devListLen] = {0};	
 	bool TXCMP_FLG = false;
 	
@@ -882,27 +882,43 @@ void ZigB_mainThread(uint8_t UART_OBJ){
 	nwkStateAttr_Zigb ZigbDevNew_tempInsert;
 	
 	ZigB_Init(UART_OBJ,0x1234,4);
+	memset(disp,0,dispLen * sizeof(char));
+	sprintf(disp,"Tips_ZigB:初始化完成.\r\n");	/*调试代码段*/
+	DbugP1TX(disp,strlen((char *)disp));	
+	osDelay(20);
 	
 //	while(1)osDelay(1000);	/*调试代码段*/
 	
+	/*zigbee在线设备节点检测*/
+	tid_ZigbDevDetect = osTimerCreate(osTimer(TimerZigbDevManage), osTimerPeriodic, zigbDevList_Head);
+	osTimerStart(tid_ZigbDevDetect, 1000UL);   
+	
 	for(;;){
 		
-		/*zigbee在线设备节点检测*/
-//		if(ZigbDevDetect_Count < ZigbDevDetect_Period)ZigbDevDetect_Count ++;
-//		else{
-//		
-//			osTimerId tid_ZigbDevDetect;
-//			tid_ZigbDevDetect = osTimerCreate(osTimer(TimerZigbDevManage), osTimerOnce, zigbDevList_Head);
-//		}
-		
-		/*WIFI消息数据接收*/
-		evt = osMessageGet(mqID_threadDP_W2Z, 5);  // wait for message
+		/*W2Z消息队列数据接收*/
+		evt = osMessageGet(mqID_threadDP_W2Z, 1);  // wait for message
 		if(evt.status == osEventMessage){
 		
 			stt_threadDatsPass *rptr_W2Z = evt.value.p;
 			
 			switch(rptr_W2Z->msgType){
-			
+					
+				case listDev_query:{
+				
+						u8 devNum = 0;
+						stt_threadDatsPass *mptr_Z2W  = (stt_threadDatsPass *)osPoolAlloc(threadDP_poolAttr_id);
+
+						mptr_Z2W->msgType = listDev_query;
+						
+						memset(datsTX_devList,0,datsTX_devListLen * sizeof(u8));
+						devNum = ZigBdevDispList(zigbDevList_Head,&datsTX_devList[1]);
+						datsTX_devList[0] = devNum;
+						memcpy(mptr_Z2W->dats.dats_devQuery.infoDevList,datsTX_devList,devNum * 2 + 1);		//（一字节PCB物理地址 + 一字节扩展地址）*devNum + 长度
+						mptr_Z2W->dats.dats_devQuery.infoLen = devNum * 2 + 1;
+					
+						osMessagePut(mqID_threadDP_Z2W, (uint32_t)mptr_Z2W, 100);
+				}break;
+				
 				case conventional:{
 					
 					nwkStateAttr_Zigb *infoZigbDevRet_temp = zigbDev_eptPutout_BYpsy(zigbDevList_Head,rptr_W2Z->dats.dats_conv.psyAddr,rptr_W2Z->dats.dats_conv.extAddr,false);
@@ -926,11 +942,6 @@ void ZigB_mainThread(uint8_t UART_OBJ){
 						osPoolFree(ZigbnwkState_poolAttr_id,infoZigbDevRet_temp);    
 					}		
 				}break;
-					
-				case listDev_query:{
-				
-					
-				}break;
 				
 				default:break;
 			}
@@ -948,7 +959,7 @@ void ZigB_mainThread(uint8_t UART_OBJ){
 			
 				case zigbTP_MSGCOMMING:{
 					
-					ZigbDevNew_temp = zigbDev_eptPutout_BYnwk(zigbDevList_Head,local_datsRX->datsSTT.stt_MSG.Addr_from,false);
+					ZigbDevNew_temp = zigbDev_eptPutout_BYnwk(zigbDevList_Head,local_datsRX->datsSTT.stt_MSG.Addr_from,true);
 					
 					if(NULL == ZigbDevNew_temp){	//设备表未能找到对应网络地址设备则新增节点，否则对应节点设备在线检测周期重置
 					
@@ -966,6 +977,7 @@ void ZigB_mainThread(uint8_t UART_OBJ){
 					}else{
 					
 						ZigbDevNew_temp->onlineDectect_LCount = ZigbDevDetect_Period;
+						ZigbDevNew_temp = NULL;
 						osPoolFree(ZigbnwkState_poolAttr_id,ZigbDevNew_temp);
 					}
 					
@@ -975,7 +987,7 @@ void ZigB_mainThread(uint8_t UART_OBJ){
 					}
 
 					memset(disp,0,dispLen * sizeof(char));
-					sprintf(disp,"接收到来自节点网络地址：0x%04X 的数据：%s\r\n",local_datsRX->datsSTT.stt_MSG.Addr_from,dats_MSG);	/*调试代码段*/
+					sprintf(disp,"Tips_ZigB:接收到来自节点网络地址：0x%04X 的数据：%s\r\n",local_datsRX->datsSTT.stt_MSG.Addr_from,dats_MSG);	/*调试代码段*/
 					DbugP1TX(disp,strlen((char *)disp));	
 					osDelay(20);
 					
@@ -1006,7 +1018,7 @@ void ZigB_mainThread(uint8_t UART_OBJ){
 														true);
 								
 								memset(disp,0,dispLen * sizeof(char));
-								sprintf(disp,"接收到特殊指令，Zigbee节点设备表数据回发动作已触发\r\n特殊数据远端响应回复是否成功：%d\r\n",TXCMP_FLG);	/*调试代码段*/
+								sprintf(disp,"Tips_ZigB:接收到特殊指令，Zigbee节点设备表数据回发动作已触发\r\n特殊数据远端响应回复是否成功：%d\r\n",TXCMP_FLG);	/*调试代码段*/
 								DbugP1TX(disp,strlen((char *)disp));	
 								osDelay(20);
 							}break;
@@ -1032,7 +1044,7 @@ void ZigB_mainThread(uint8_t UART_OBJ){
 					
 				case zigbTP_ntCONNECT:{
 				
-					sprintf((char *)disp,"检测到新节点上线，节点地址：0x%04X\r\n",local_datsRX->datsSTT.stt_ONLINE.nwkAddr_fresh);	/*调试代码段*/
+					sprintf((char *)disp,"Tips_ZigB:检测到新节点上线，节点地址：0x%04X\r\n",local_datsRX->datsSTT.stt_ONLINE.nwkAddr_fresh);	/*调试代码段*/
 					DbugP1TX(disp,strlen((char *)disp));	/*调试语句*/
 					osDelay(20);
 				}break;
@@ -1105,7 +1117,6 @@ bool wifi_ATCMD_INPUT(uint8_t UART_OBJ,char *CMD,char *REPLY[2],u8 REPLY_LEN[2],
 void WIFI_Init(uint8_t UART_OBJ){
 
 	const u8 InitCMDLen = 10;
-	
 	const datsAttr_wifiInit wifiInit_dats[InitCMDLen] = {
 	
 		{"ATE0\r\n",															{"OK","OK"},	{2,2},	100},
@@ -1260,13 +1271,38 @@ bool WIFI_datsRX(u8 UART_OBJ,datsAttr_WIFITrans *datsRX,u32 timeWait){
 			
 				case 0:{
 					
-					xorLocation = *(ptr + 7) - '0' + 8;
-					if(*(ptr + 9) == WIFI_FRAME_HEAD && *(ptr + xorLocation) == XOR_CHECK((ptr + 10),*(ptr + 7) - '0' - 2)){		//帧头校验及帧尾异或校验
+					u8 *ptr_numCfr = ptr;		//查询数据长度最高权位  最高权位为个、十、百时ascii所占位数不同
+					u8 datsKernelLen = 0;		//核心数据长度
+					u8 loop_a = 0;				//占位统计
+					u8 Aweight = 1;				//权值
+//					char disp[100] = {0};		/*测试代码段*/
+					
+					while(*(ptr_numCfr ++) != ':');
+					ptr_numCfr -= 2; //回减2 重新指向':'前个位下标
+					
+//					sprintf(disp,"我是测试点1数据：%c \r\n",*ptr_numCfr);
+//					DbugP1TX(disp,strlen(disp));		/*测试代码段*/
+//					osDelay(20);
+					
+					while(*ptr_numCfr != ','){
+					
+						loop_a ++;			//占位统计
+						datsKernelLen += Aweight * (*ptr_numCfr - '0');
+						Aweight *= 10;		//十进制权值自增
+						ptr_numCfr --;
+					}
+					
+//					sprintf(disp,"我是测试点2数据：%d \r\n",datsKernelLen);
+//					DbugP1TX(disp,strlen(disp));		/*测试代码段*/
+//					osDelay(20);
+					
+					xorLocation = datsKernelLen + 7 + loop_a;
+					if(*(ptr + 8 + loop_a) == WIFI_FRAME_HEAD && *(ptr + xorLocation) == XOR_CHECK((ptr + 9 + loop_a),datsKernelLen - 2)){		//帧头校验及帧尾异或校验
 						
 						datsRX->linkObj = *(ptr + 5) - '0';
-						memcpy(datsRX->CMD,ptr + 11,2);
-						memcpy(datsRX->dats,ptr + 13,*(ptr + 10));
-						datsRX->datsLen = *(ptr + 10);
+						memcpy(datsRX->CMD,ptr + 10 + loop_a,2);
+						memcpy(datsRX->dats,ptr + 12 + loop_a,*(ptr + 9 + loop_a));
+						datsRX->datsLen = *(ptr + 9 + loop_a);
 						
 						datsRX->datsType = wifiTP_MSGCOMMING;
 						return true;
@@ -1379,7 +1415,7 @@ bool WIFI_datsTX(uint8_t UART_OBJ,
 	/*条件选择 远端（即接收端）响应确认*/
 	if(true == responseIF){
 	
-		if(TXCMP_FLG && true == WIFI_datsRX(UART_OBJ,local_datsRX,200)){
+		if(TXCMP_FLG && true == WIFI_datsRX(UART_OBJ,local_datsRX,200)){	/**注意调试合适的响应时间**/
 		
 			if(wifiTP_MSGCOMMING == local_datsRX->datsType && !memcmp(local_datsRX->CMD,ASR_CMDDst,ASR_CMDDstLen)){
 			
@@ -1418,8 +1454,8 @@ void WIFI_mainThread(uint8_t UART_OBJ){
 	
 	u8 loop;
 	
-	const u8 Test_dats[10] = {0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A};
-	bool  TEST_TXCMPFLAG = false;
+//	const u8 Test_dats[10] = {0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A};
+//	bool  TEST_TXCMPFLAG = false;
 	
 	u8	wifiContDec_cnt = 0;
 	const u8 wifiCDec_period = 100; //wifi已建立连接数目检测周期（主动检测）
@@ -1428,6 +1464,10 @@ void WIFI_mainThread(uint8_t UART_OBJ){
 	datsAttr_WIFITrans *local_datsRX = (datsAttr_WIFITrans *) osPoolAlloc(WIFITrans_poolAttr_id);
 	
 	WIFI_Init(UART_OBJ);	
+	memset(disp,0,dispLen * sizeof(char));
+	snprintf(disp,dispLen,"Tips_WIFI:WIFI初始化完成.\r\n");
+	DbugP1TX(disp,strlen((char *)disp));	
+	osDelay(20);
 	
 	for(;;){
 		
@@ -1440,13 +1480,29 @@ void WIFI_mainThread(uint8_t UART_OBJ){
 //			CONNECT_HOOK = 0x1f; //连接数目调试值/*调试语句*/
 		}
 		
-		/*Zigbee消息数据接收*/
-		evt = osMessageGet(mqID_threadDP_Z2W, 5);  // wait for message
+		/*Z2W消息队列数据接收*/
+		evt = osMessageGet(mqID_threadDP_Z2W, 1);  // wait for message
 		if(evt.status == osEventMessage){
 		
 			stt_threadDatsPass *rptr_Z2W = evt.value.p;
 			switch(rptr_Z2W->msgType){
 			
+				case listDev_query:{
+				
+					if(CONNECT_HOOK){
+					
+						memset(dats_kernelTXBUF,0,dats_kernelTXBUFLen * sizeof(u8));
+						memcpy(dats_kernelTXBUF,rptr_Z2W->dats.dats_devQuery.infoDevList,rptr_Z2W->dats.dats_devQuery.infoLen);
+						for(loop = 0;loop < 5;loop ++){
+						
+							if(CONNECT_HOOK & (1 << loop)){
+							
+								WIFI_datsTX(UART_OBJ,loop,(u8 *)datsTransCMD[0].datsCMDTX,datsTransCMD_length,(u8 *)dats_kernelTXBUF,rptr_Z2W->dats.dats_devQuery.infoLen,true);
+							}
+						}
+					}
+				}break;
+				
 				case conventional:{
 				
 					if(CONNECT_HOOK){
@@ -1463,11 +1519,6 @@ void WIFI_mainThread(uint8_t UART_OBJ){
 							}
 						}
 					}
-				}break;
-					
-				case listDev_query:{
-				
-					
 				}break;
 				
 				default:break;
@@ -1495,7 +1546,8 @@ void WIFI_mainThread(uint8_t UART_OBJ){
 						sprintf((char *)&dats_MSG[loop * 3],"%02X ",local_datsRX->dats[loop]);
 					}
 					
-					snprintf(disp,dispLen,"接收到来自链接单元：%d 的指令：0x%02X%02X  及其所附带的数据：%s \r\n",local_datsRX->linkObj,local_datsRX->CMD[0],local_datsRX->CMD[1],dats_MSG);
+					memset(disp,0,dispLen * sizeof(char));
+					snprintf(disp,dispLen,"Tips_WIFI:接收到来自链接单元：%d 的指令：0x%02X%02X  及其所附带的数据：%s \r\n",local_datsRX->linkObj,local_datsRX->CMD[0],local_datsRX->CMD[1],dats_MSG);
 					DbugP1TX(disp,strlen((char *)disp));	
 					osDelay(20);
 					
@@ -1514,9 +1566,13 @@ void WIFI_mainThread(uint8_t UART_OBJ){
 								
 								mptr_W2Z->msgType = listDev_query;
 								
+								osMessagePut(mqID_threadDP_W2Z, (uint32_t)mptr_W2Z, 100);
+								
 								memset(disp,0,dispLen * sizeof(char));
-								TEST_TXCMPFLAG = WIFI_datsTX(UART_OBJ,local_datsRX->linkObj,(u8 *)Test_dats,2,(u8 *)Test_dats,5,true);
-								snprintf(disp,dispLen,"检测到特殊指令数据，触发数据回发动作\r\n特殊数据远端响应回复是否成功：%d\r\n",TEST_TXCMPFLAG);	/*调试代码段*/
+								snprintf(disp,dispLen,"Tips_WIFI:接收到特殊指令，Zigbee节点设备表数据回发动作已触发\r\n");
+								
+//								TEST_TXCMPFLAG = WIFI_datsTX(UART_OBJ,local_datsRX->linkObj,(u8 *)Test_dats,2,(u8 *)Test_dats,5,true);
+//								snprintf(disp,dispLen,"检测到特殊指令数据，触发数据回发动作\r\n特殊数据远端响应回复是否成功：%d\r\n",TEST_TXCMPFLAG);	/*调试代码段*/
 								DbugP1TX(disp,strlen((char *)disp));	
 								osDelay(20);
 							}break;
@@ -1542,14 +1598,14 @@ void WIFI_mainThread(uint8_t UART_OBJ){
 				case wifiTP_ntCONNECT:{
 				
 					CONNECT_HOOK |= 1 << local_datsRX->linkObj;
-					snprintf(disp,dispLen,"单元：%d 链接已创建\r\n",local_datsRX->linkObj);
+					snprintf(disp,dispLen,"Tips_WIFI:单元：%d 链接已创建\r\n",local_datsRX->linkObj);
 					DbugP1TX(disp,strlen((char *)disp));	
 					osDelay(20);
 				}break;
 				
 				case wifiTP_ntDISCONNECT:{
 				
-					snprintf(disp,dispLen,"单元：%d 链接已断开\r\n",local_datsRX->linkObj);
+					snprintf(disp,dispLen,"Tips_WIFI:单元：%d 链接已断开\r\n",local_datsRX->linkObj);
 					CONNECT_HOOK &= 0 << local_datsRX->linkObj;
 					DbugP1TX(disp,strlen((char *)disp));	
 					osDelay(20);
@@ -1595,11 +1651,18 @@ void com5DataTransP3_Thread(const void *argument){
 	WIFI_mainThread(comObj_DataTransP3);
 }
 
+/*链表优化定时器回调函数*/
 void TimerZigbDevManage_Callback(void const *arg){
+	
+	const u8 dispLen = 150;
+	char disp[dispLen];
 
 	nwkStateAttr_Zigb *pHead_listDevInfo = (nwkStateAttr_Zigb *)arg;
 	
 	zigbDev_delSame(pHead_listDevInfo);		//链表优化，去重
+	
+//	DbugP1TX("ZigBdev Online detect counting tips\r\n",37);	
+//	osDelay(20);
 	
 	if(0 == zigbDev_chatLenDectect(pHead_listDevInfo)){	//表内无节点，直接返回
 		
@@ -1613,8 +1676,15 @@ void TimerZigbDevManage_Callback(void const *arg){
 		
 		if(pHead_listDevInfo->onlineDectect_LCount > 0)pHead_listDevInfo->onlineDectect_LCount --;
 		else{
+			
+			u16 p_nwkRemove = pHead_listDevInfo->nwkAddr;
+			
+			zigbDev_eptRemove_BYnwk((nwkStateAttr_Zigb *)arg,p_nwkRemove);
 		
-			zigbDev_eptRemove_BYnwk((nwkStateAttr_Zigb *)arg,pHead_listDevInfo->nwkAddr);
+			memset(disp,0,dispLen * sizeof(char));
+			snprintf(disp,dispLen,"Tips_ZigB:由于节点设备链表中网络地址为:0x%04X 的节点设备在既定时间内无数据传输已被链表优化.\r\n",p_nwkRemove);
+			DbugP1TX(disp,strlen((char *)disp));	
+			osDelay(20);
 		}
 	}
 }

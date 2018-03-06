@@ -170,8 +170,8 @@ typedef union STTthreadDatsPass_dats{	//进程数据传输数据类型共用体
 
 typedef enum threadDatsPass_msgType{	//进程数据传输数据类型枚举
 
-	conventional = 0,
-	listDev_query,
+	listDev_query = 0,
+	conventional,
 }threadDP_msgType;
 
 typedef struct STTthreadDatsPass{	//通用进程数据传输结构体
