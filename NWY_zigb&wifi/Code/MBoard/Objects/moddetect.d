@@ -27,3 +27,5 @@
 .\objects\moddetect.o: D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\RTOS\RTX\INC\cmsis_os.h
 .\objects\moddetect.o: D:\Keil\Software\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\moddetect.o: D:\Keil\Software\ARM\ARMCC\Bin\..\include\string.h
+.\objects\moddetect.o: .\Member_dataTrans\UART_dataTransfer.h
+.\objects\moddetect.o: D:\Keil\Software\ARM\ARMCC\Bin\..\include\stdarg.h

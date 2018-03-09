@@ -3,12 +3,12 @@
 .\objects\main.o: D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\RTOS\RTX\INC\cmsis_os.h
 .\objects\main.o: D:\Keil\Software\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\main.o: D:\Keil\Software\ARM\ARMCC\Bin\..\include\stddef.h
-.\objects\main.o: .\Member_dataTrans\UART_dataTransfer.h
+.\objects\main.o: Usr\modDetect.h
 .\objects\main.o: D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Driver\Include\Driver_USART.h
 .\objects\main.o: D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Driver\Include\Driver_Common.h
 .\objects\main.o: D:\Keil\Software\ARM\ARMCC\Bin\..\include\stdbool.h
-.\objects\main.o: .\Usr\IO_Map.h
-.\objects\main.o: .\Usr\delay.h
+.\objects\main.o: Usr\IO_Map.h
+.\objects\main.o: Usr\delay.h
 .\objects\main.o: D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include\stm32f10x.h
 .\objects\main.o: E:\My_GTAProject\Project_NetGateway\Software\NWY_zigb&wifi\Code\MBoard\RTE\RTE_Components.h
 .\objects\main.o: D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Include\core_cm3.h
@@ -27,6 +27,7 @@
 .\objects\main.o: D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\StdPeriph_Driver\inc\misc.h
 .\objects\main.o: D:\Keil\Software\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\main.o: D:\Keil\Software\ARM\ARMCC\Bin\..\include\string.h
+.\objects\main.o: .\Member_dataTrans\UART_dataTransfer.h
 .\objects\main.o: D:\Keil\Software\ARM\ARMCC\Bin\..\include\stdarg.h
 .\objects\main.o: .\Member_Disp\LCD_1.44.h
 .\objects\main.o: D:\Keil\Software\ARM\ARMCC\Bin\..\include\stdlib.h

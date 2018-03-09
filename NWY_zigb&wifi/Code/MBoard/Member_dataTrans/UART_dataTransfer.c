@@ -1,11 +1,5 @@
 #include "UART_dataTransfer.h"
 
-extern ARM_DRIVER_USART Driver_USART1;
-extern ARM_DRIVER_USART Driver_USART2;
-extern ARM_DRIVER_USART Driver_USART3;
-extern ARM_DRIVER_USART Driver_USART4;
-extern ARM_DRIVER_USART Driver_USART5;
-
 osThreadId tid_com1DbugP1_Thread;
 osThreadId tid_com2DbugP2_Thread;
 osThreadId tid_com3DataTransP1_Thread;
@@ -14,7 +8,7 @@ osThreadId tid_com5DataTransP3_Thread;
 
 osThreadDef(com1DbugP1_Thread,osPriorityNormal,	1,	1024);
 osThreadDef(com2DbugP2_Thread,osPriorityNormal,	1,	1024);
-osThreadDef(com3DataTransP1_Thread,osPriorityNormal,	1,	1024);
+osThreadDef(com3DataTransP1_Thread,osPriorityNormal,	1,	4096);
 osThreadDef(com4DataTransP2_Thread,osPriorityNormal,	1,	4096);
 osThreadDef(com5DataTransP3_Thread,osPriorityNormal,	1,	4096);
 
@@ -24,14 +18,16 @@ osPoolDef (datsZigbTrans_pool, 5, datsAttr_ZigbTrans); // Declare memory pool	//
 osPoolId  (ZigbTrans_poolAttr_id);                     // Memory pool ID
 osPoolDef (nwkZigbDevStateAttr_pool, 32, nwkStateAttr_Zigb);  // Declare memory pool	//ZIGB网络节点信息 数据结构池
 osPoolId  (ZigbnwkState_poolAttr_id);                  // Memory pool ID
-osPoolDef (datsWIFITrans_pool, 5, datsAttr_WIFITrans);  // Declare memory pool
+osPoolDef (datsWIFITrans_pool, 5, datsAttr_WIFITrans);  // Declare memory pool	//WIFI进程内数据传输 数据结构池
 osPoolId  (WIFITrans_poolAttr_id);                   	 // Memory pool ID
+osPoolDef (dtThreadActInitParm_pool, 5, type_ftOBJ);  // Declare memory pool	//数据传输进程初始化信息 数据结构池
+osPoolId  (dttAct_poolAttr_id); 
 
-osPoolDef (threadDatsPass_pool, 10, stt_threadDatsPass);  // Declare memory pool
+osPoolDef (threadDatsPass_pool, 10, stt_threadDatsPass);  // Declare memory pool	//数据传输进程间消息传递 数据结构池
 osPoolId  (threadDP_poolAttr_id);                   	 // Memory pool ID
-osMessageQDef(MsgBox_threadDP_Z2W, 5, &stt_threadDatsPass);   // Define message queue
+osMessageQDef(MsgBox_threadDP_Z2W, 5, &stt_threadDatsPass);   // Define message queue	//ZigB到WIFI消息队列
 osMessageQId  mqID_threadDP_Z2W;
-osMessageQDef(MsgBox_threadDP_W2Z, 5, &stt_threadDatsPass);   // Define message queue
+osMessageQDef(MsgBox_threadDP_W2Z, 5, &stt_threadDatsPass);   // Define message queue	//WIFI到ZigB消息队列
 osMessageQId  mqID_threadDP_W2Z;
 
 //typedef int32_t (*fun_UARTRecv)(void *data, uint32_t num);
@@ -277,7 +273,7 @@ void zigbDev_delSame(nwkStateAttr_Zigb *head)
         q = p;
         while(q->next != NULL) 
         {
-            if(q->next->nwkAddr == p->nwkAddr || (q->next->psyAddr == p->psyAddr && q->next->psyAddr == p->extAddr))	   
+            if(q->next->nwkAddr == p->nwkAddr || (q->next->psyAddr == p->psyAddr && q->next->extAddr == p->extAddr))	   
             {
                 r = q->next; 
                 q->next = r->next;   
@@ -492,8 +488,8 @@ u8 XOR_CHECK(u8 buf[],u8 length){
 
 u8 ZigB_TXFrameLoad(u8 frame[],u8 cmd[],u8 cmdLen,u8 dats[],u8 datsLen){		
 
-	const u8 frameHead = 0xFE;		//ZNP,SOF帧头
-	u8 xor_check = datsLen;			//异或校验，帧尾
+	const u8 frameHead = ZIGB_FRAME_HEAD;	//ZNP,SOF帧头
+	u8 xor_check = datsLen;					//异或校验，帧尾
 	u8 loop = 0;
 	u8 ptr = 0;
 	
@@ -513,7 +509,7 @@ u8 ZigB_TXFrameLoad(u8 frame[],u8 cmd[],u8 cmdLen,u8 dats[],u8 datsLen){
 	return ptr;
 }
 
-bool zigb_VALIDA_INPUT(uint8_t UART_OBJ,		//串口对象
+bool zigb_VALIDA_INPUT(type_uart_OBJ UART_OBJ,		//串口对象
 					   uint8_t REQ_CMD[2],		//指令
 					   uint8_t REQ_DATS[],		//数据
 					   uint8_t REQdatsLen,		//数据长度
@@ -583,7 +579,7 @@ bool zigb_VALIDA_INPUT(uint8_t UART_OBJ,		//串口对象
 	return false;
 }
 					   
-bool zigb_clusterSet(u8 UART_OBJ,u16 deviveID,u8 endPoint){
+bool zigb_clusterSet(type_uart_OBJ UART_OBJ,u16 deviveID,u8 endPoint){
 
 	const datsAttr_ZigbInit default_param = {{0x24,0x00},{0x0E,0x0D,0x00,0x0D,0x00,0x0D,0x00,0x01,0x00,0x00,0x01,0x00,0x00},0x0D,{0xFE,0x01,0x64,0x00,0x00,0x65},0x06,500};	//数据簇注册,默认参数
 	
@@ -605,7 +601,7 @@ bool zigb_clusterSet(u8 UART_OBJ,u16 deviveID,u8 endPoint){
 							 default_param.timeTab_waitAnsr);
 }
 
-bool ZigB_Init(uint8_t UART_OBJ,uint16_t PANID,uint8_t CHANNELS){		
+bool ZigB_Init(type_uart_OBJ UART_OBJ,uint16_t PANID,uint8_t CHANNELS){		
 
 	const u8 InitCMDLen = 7;	
 	
@@ -767,7 +763,7 @@ bool ZigB_datsRX(u8 UART_OBJ,datsAttr_ZigbTrans *datsRX,u32 timeWait){
 	return false;
 }
 
-bool ZigB_datsTX(uint8_t  UART_OBJ,
+bool ZigB_datsTX(type_uart_OBJ  UART_OBJ,
 				 uint16_t DstAddr,
 				 uint8_t  SrcPoint,
 				 uint8_t  DstPoint,
@@ -848,7 +844,7 @@ bool ZigB_datsTX(uint8_t  UART_OBJ,
 	return TXCMP_FLG;
 }
 					
-void ZigB_mainThread(uint8_t UART_OBJ){
+void ZigB_mainThread(type_uart_OBJ UART_OBJ){
 
 	osEvent  evt;
 	
@@ -889,8 +885,6 @@ void ZigB_mainThread(uint8_t UART_OBJ){
 	DbugP1TX(disp,strlen((char *)disp));	
 	osDelay(20);
 	
-//	while(1)osDelay(1000);	/*调试代码段*/
-	
 	/*zigbee在线设备节点检测定时器初始化*/
 	tid_ZigbDevDetect = osTimerCreate(osTimer(TimerZigbDevManage), osTimerPeriodic, zigbDevList_Head);
 	osTimerStart(tid_ZigbDevDetect, 1000UL);   
@@ -907,18 +901,18 @@ void ZigB_mainThread(uint8_t UART_OBJ){
 					
 				case listDev_query:{
 				
-						u8 devNum = 0;
-						stt_threadDatsPass *mptr_Z2W  = (stt_threadDatsPass *)osPoolAlloc(threadDP_poolAttr_id);
+					u8 devNum = 0;
+					stt_threadDatsPass *mptr_Z2W  = (stt_threadDatsPass *)osPoolAlloc(threadDP_poolAttr_id);
 
-						mptr_Z2W->msgType = listDev_query;
-						
-						memset(datsTX_devList,0,datsTX_devListLen * sizeof(u8));
-						devNum = ZigBdevDispList(zigbDevList_Head,&datsTX_devList[1]);
-						datsTX_devList[0] = devNum;
-						memcpy(mptr_Z2W->dats.dats_devQuery.infoDevList,datsTX_devList,devNum * 2 + 1);		//（一字节PCB物理地址 + 一字节扩展地址）*devNum + 长度
-						mptr_Z2W->dats.dats_devQuery.infoLen = devNum * 2 + 1;
+					mptr_Z2W->msgType = listDev_query;
 					
-						osMessagePut(mqID_threadDP_Z2W, (uint32_t)mptr_Z2W, 100);
+					memset(datsTX_devList,0,datsTX_devListLen * sizeof(u8));
+					devNum = ZigBdevDispList(zigbDevList_Head,&datsTX_devList[1]);
+					datsTX_devList[0] = devNum;
+					memcpy(mptr_Z2W->dats.dats_devQuery.infoDevList,datsTX_devList,devNum * 2 + 1);		//（一字节PCB物理地址 + 一字节扩展地址）*devNum + 长度
+					mptr_Z2W->dats.dats_devQuery.infoLen = devNum * 2 + 1;
+				
+					osMessagePut(mqID_threadDP_Z2W, (uint32_t)mptr_Z2W, 100);
 				}break;
 				
 				case conventional:{
@@ -1059,8 +1053,8 @@ void ZigB_mainThread(uint8_t UART_OBJ){
 
 u8 WIFI_TXFrameLoad(u8 frame[],u8 cmd[],u8 cmdLen,u8 dats[],u8 datsLen){
 
-	const u8 frameHead = WIFI_FRAME_HEAD;		//SOF帧头
-	u8 xor_check = datsLen;			//异或校验，帧尾
+	const u8 frameHead = WIFI_FRAME_HEAD;	//SOF帧头
+	u8 xor_check = datsLen;					//异或校验，帧尾
 	u8 loop = 0;
 	u8 ptr = 0;
 	
@@ -1080,7 +1074,7 @@ u8 WIFI_TXFrameLoad(u8 frame[],u8 cmd[],u8 cmdLen,u8 dats[],u8 datsLen){
 	return ptr;
 }
 
-bool wifi_ATCMD_INPUT(uint8_t UART_OBJ,char *CMD,char *REPLY[2],u8 REPLY_LEN[2],u8 times,u16 timeDelay){
+bool wifi_ATCMD_INPUT(type_uart_OBJ UART_OBJ,char *CMD,char *REPLY[2],u8 REPLY_LEN[2],u8 times,u16 timeDelay){
 	
 	const u8 dataLen = 100;
 	u8 dataRXBUF[dataLen] = {0};
@@ -1116,7 +1110,7 @@ bool wifi_ATCMD_INPUT(uint8_t UART_OBJ,char *CMD,char *REPLY[2],u8 REPLY_LEN[2],
 	}return false;
 }
 
-void WIFI_Init(uint8_t UART_OBJ){
+void WIFI_Init(type_uart_OBJ UART_OBJ){
 
 	const u8 InitCMDLen = 10;
 	const datsAttr_wifiInit wifiInit_dats[InitCMDLen] = {
@@ -1336,7 +1330,7 @@ bool WIFI_datsRX(u8 UART_OBJ,datsAttr_WIFITrans *datsRX,u32 timeWait){
 	return false;
 }
 
-bool WIFI_datsTX(uint8_t UART_OBJ,
+bool WIFI_datsTX(type_uart_OBJ UART_OBJ,
 				 uint8_t linkObj,
 				 uint8_t CMD[],
 				 uint8_t CMDLen,
@@ -1436,7 +1430,7 @@ bool WIFI_datsTX(uint8_t UART_OBJ,
 	return TXCMP_FLG;
 }
 					
-void WIFI_mainThread(uint8_t UART_OBJ){
+void WIFI_mainThread(type_uart_OBJ UART_OBJ){
 	
 	osEvent  evt;
 	
@@ -1614,8 +1608,37 @@ void WIFI_mainThread(uint8_t UART_OBJ){
 		}
 	}
 }
+
+void dataTransThread_Active(const void *argument){
+
+	paramLaunch_OBJ *datsTransActOBJ = (paramLaunch_OBJ *)argument;
+	
+	switch(datsTransActOBJ->funTrans_OBJ){
+	
+		case ftOBJ_ZIGB:{
+		
+			ZigB_mainThread(datsTransActOBJ->uart_OBJ);
+		}break;
+		
+		case ftOBJ_WIFI:{
+		
+			WIFI_mainThread(datsTransActOBJ->uart_OBJ);
+		}break;
+		
+		case ftOBJ_DEBUG:{
+		
+			
+		}break;
+		
+		default:break;
+	}
+	
+	osPoolFree(dttAct_poolAttr_id,datsTransActOBJ);
+}
 					
 void com1DbugP1_Thread(const void *argument){
+	
+	dataTransThread_Active(argument);
 
 	for(;;){
 	
@@ -1625,6 +1648,8 @@ void com1DbugP1_Thread(const void *argument){
 
 void com2DbugP2_Thread(const void *argument){
 	
+	dataTransThread_Active(argument);
+	
 	for(;;){
 	
 		osDelay(100);
@@ -1633,20 +1658,17 @@ void com2DbugP2_Thread(const void *argument){
 
 void com3DataTransP1_Thread(const void *argument){
 	
-	for(;;){
-	
-		osDelay(100);
-	}
+	dataTransThread_Active(argument);
 }
 
 void com4DataTransP2_Thread(const void *argument){
 
-	ZigB_mainThread(comObj_DataTransP2);
+	dataTransThread_Active(argument);
 }
 
 void com5DataTransP3_Thread(const void *argument){
 	
-	WIFI_mainThread(comObj_DataTransP3);
+	dataTransThread_Active(argument);
 }
 
 /*链表优化定时器回调函数*/
@@ -1692,6 +1714,7 @@ void osMemoryInit(void){
 	ZigbTrans_poolAttr_id 	 = osPoolCreate(osPool(datsZigbTrans_pool));		//zigbee数据传输 数据结构堆内存池初始化
 	ZigbnwkState_poolAttr_id = osPoolCreate(osPool(nwkZigbDevStateAttr_pool));	//zigbee节点设备信息 数据结构堆内存池初始化
 	WIFITrans_poolAttr_id	 = osPoolCreate(osPool(datsWIFITrans_pool));		//wifi数据传输 数据结构堆内存池初始化
+	dttAct_poolAttr_id	 	 = osPoolCreate(osPool(dtThreadActInitParm_pool));	//数据传输进程初始化信息 数据结构堆内存池初始化
 }
 
 void msgQueueInit(void){
@@ -1702,28 +1725,33 @@ void msgQueueInit(void){
 	mqID_threadDP_W2Z = osMessageCreate(osMessageQ(MsgBox_threadDP_W2Z), NULL);	//wifi到zigbee消息队列初始化
 }
 
-void communicationActive(uint8_t comObj){
+void communicationActive(type_uart_OBJ comObj,type_ftOBJ ftTransObj){
+	
+	paramLaunch_OBJ *param_DatsTransAct = (paramLaunch_OBJ *)osPoolAlloc(dttAct_poolAttr_id);
+	
+	param_DatsTransAct->uart_OBJ 		= comObj;
+	param_DatsTransAct->funTrans_OBJ 	= ftTransObj;
 
-	switch(comObj){
+	switch(param_DatsTransAct->uart_OBJ){
 	
 		case comObj_DbugP1:		USART1_DbugP1_Init();
-								tid_com1DbugP1_Thread = osThreadCreate(osThread(com1DbugP1_Thread),NULL);
+								tid_com1DbugP1_Thread = osThreadCreate(osThread(com1DbugP1_Thread),param_DatsTransAct);
 								break;
 		
 		case comObj_DbugP2:		USART2_DbugP2_Init();
-								tid_com2DbugP2_Thread = osThreadCreate(osThread(com2DbugP2_Thread),NULL);
+								tid_com2DbugP2_Thread = osThreadCreate(osThread(com2DbugP2_Thread),param_DatsTransAct);
 								break;
 				
 		case comObj_DataTransP1:USART3_DataTransP1_Init();
-								tid_com3DataTransP1_Thread = osThreadCreate(osThread(com3DataTransP1_Thread),NULL);
+								tid_com3DataTransP1_Thread = osThreadCreate(osThread(com3DataTransP1_Thread),param_DatsTransAct);
 								break;
 				
 		case comObj_DataTransP2:USART4_DataTransP2_Init();
-								tid_com4DataTransP2_Thread = osThreadCreate(osThread(com4DataTransP2_Thread),NULL);
+								tid_com4DataTransP2_Thread = osThreadCreate(osThread(com4DataTransP2_Thread),param_DatsTransAct);
 								break;
 		
 		case comObj_DataTransP3:USART5_DataTransP3_Init();
-								tid_com5DataTransP3_Thread = osThreadCreate(osThread(com5DataTransP3_Thread),NULL);
+								tid_com5DataTransP3_Thread = osThreadCreate(osThread(com5DataTransP3_Thread),param_DatsTransAct);
 								break;
 		
 				   default:		break;

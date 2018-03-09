@@ -52,11 +52,33 @@
 #define	FRAME_SIZEDataTransP2	100
 #define	FRAME_SIZEDataTransP3	100
 
-#define comObj_DbugP1		0xA1
-#define comObj_DbugP2		0xA2
-#define comObj_DataTransP1	0xA3
-#define comObj_DataTransP2	0xA4
-#define comObj_DataTransP3	0xA5
+extern ARM_DRIVER_USART Driver_USART1;
+extern ARM_DRIVER_USART Driver_USART2;
+extern ARM_DRIVER_USART Driver_USART3;
+extern ARM_DRIVER_USART Driver_USART4;
+extern ARM_DRIVER_USART Driver_USART5;
+
+typedef enum{
+
+	comObj_DbugP1 = 0xA1,
+	comObj_DbugP2,
+	comObj_DataTransP1,
+	comObj_DataTransP2,
+	comObj_DataTransP3,
+}type_uart_OBJ;
+
+typedef enum{
+
+	ftOBJ_ZIGB = 0x0A,
+	ftOBJ_WIFI,
+	ftOBJ_DEBUG,
+}type_ftOBJ;
+
+typedef struct{
+
+	type_uart_OBJ 	uart_OBJ;
+	type_ftOBJ		funTrans_OBJ;
+}paramLaunch_OBJ;
 
 typedef struct WIFI_Init_datsAttr{
 
@@ -180,12 +202,23 @@ typedef struct STTthreadDatsPass{	//通用进程数据传输结构体
 	stt_threadDatsPass_dats dats;	//数据实体（公用体包含所有数据类型，单次仅传输其中一种）
 }stt_threadDatsPass;
 
+extern osThreadId tid_com3DataTransP1_Thread;
+extern osThreadId tid_com4DataTransP2_Thread;
+extern osThreadId tid_com5DataTransP3_Thread;
+
+/*功能函数*/
+void *memmem(void *start, unsigned int s_len, void *find,unsigned int f_len);
+int memloc(u8 str2[],u8 num_s2,u8 str1[],u8 num_s1);
+int strloc(char *str2,char *str1);
+
+/*驱动函数*/
 void USART1_DbugP1_Init(void);
 void USART2_DbugP2_Init(void);
 void USART3_DataTransP1_Init(void);
 void USART3_DataTransP2_Init(void);
 void USART5_DataTransP3_Init(void);
 
+/*内存管理*/
 void msgQueueInit(void);
 void osMemoryInit(void);
 
@@ -197,7 +230,7 @@ void com5DataTransP3_Thread	(const void *argument);
 
 void TimerZigbDevManage_Callback(void const *arg);
 
-void communicationActive(uint8_t comObj);
+void communicationActive(type_uart_OBJ comObj,type_ftOBJ ftTransObj);
 
 #endif
 

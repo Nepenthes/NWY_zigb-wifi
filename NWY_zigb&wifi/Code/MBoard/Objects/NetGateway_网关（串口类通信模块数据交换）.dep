@@ -1,15 +1,15 @@
 Dependencies for Project 'NetGateway', Target '网关（串口类通信模块数据交换）': (DO NOT MODIFY !)
-F (.\Usr\main.c)(0x5A98BE71)(-c --cpu Cortex-M3 -D__RTX -g -O0 --apcs=interwork --split_sections -I .\Usr -I .\Usr\reWrite -I .\Member_dataTrans -I .\Member_Disp-I E:\My_GTAProject\Project_NetGateway\Software\NWY_zigb&wifi\Code\MBoard\RTE-I E:\My_GTAProject\Project_NetGateway\Software\NWY_zigb&wifi\Code\MBoard\RTE\Device\STM32F103VC-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Driver\Include-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Include-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\RTOS\RTX\INC-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\StdPeriph_Driver\inc-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\RTE_Driver-D__UVISION_VERSION="518" -D_RTE_ -DSTM32F10X_HD-o .\objects\main.o --omf_browse .\objects\main.crf --depend .\objects\main.d)
+F (.\Usr\main.c)(0x5AA1ED88)(-c --cpu Cortex-M3 -D__RTX -g -O0 --apcs=interwork --split_sections -I .\Usr -I .\Usr\reWrite -I .\Member_dataTrans -I .\Member_Disp-I E:\My_GTAProject\Project_NetGateway\Software\NWY_zigb&wifi\Code\MBoard\RTE-I E:\My_GTAProject\Project_NetGateway\Software\NWY_zigb&wifi\Code\MBoard\RTE\Device\STM32F103VC-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Driver\Include-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Include-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\RTOS\RTX\INC-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\StdPeriph_Driver\inc-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\RTE_Driver-D__UVISION_VERSION="518" -D_RTE_ -DSTM32F10X_HD-o .\objects\main.o --omf_browse .\objects\main.crf --depend .\objects\main.d)
 I (Usr\osObjects.h)(0x5A797A45)
 I (D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\RTOS\RTX\INC\cmsis_os.h)(0x5983FFB6)
 I (D:\Keil\Software\ARM\ARMCC\include\stdint.h)(0x569DEA3A)
 I (D:\Keil\Software\ARM\ARMCC\include\stddef.h)(0x569DEA3A)
-I (.\Member_dataTrans\UART_dataTransfer.h)(0x5A9D1495)
+I (Usr\modDetect.h)(0x5AA23395)
 I (D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Driver\Include\Driver_USART.h)(0x58AA8AF6)
 I (D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Driver\Include\Driver_Common.h)(0x58AA8AF4)
 I (D:\Keil\Software\ARM\ARMCC\include\stdbool.h)(0x569DEA3A)
-I (.\Usr\IO_Map.h)(0x5A797A45)
-I (.\Usr\delay.h)(0x5A797A45)
+I (Usr\IO_Map.h)(0x5A797A45)
+I (Usr\delay.h)(0x5A797A45)
 I (D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include\stm32f10x.h)(0x5825386C)
 I (E:\My_GTAProject\Project_NetGateway\Software\NWY_zigb&wifi\Code\MBoard\RTE\RTE_Components.h)(0x5A8977C9)
 I (D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Include\core_cm3.h)(0x5A0D5BFA)
@@ -27,8 +27,9 @@ I (D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\StdPeriph_Driver\in
 I (D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\StdPeriph_Driver\inc\misc.h)(0x52F9EB20)
 I (D:\Keil\Software\ARM\ARMCC\include\stdio.h)(0x5A1F6BA0)
 I (D:\Keil\Software\ARM\ARMCC\include\string.h)(0x569DEA3A)
+I (.\Member_dataTrans\UART_dataTransfer.h)(0x5AA22AB1)
 I (D:\Keil\Software\ARM\ARMCC\include\stdarg.h)(0x569DEA3A)
-I (.\Member_Disp\LCD_1.44.h)(0x5A797A45)
+I (.\Member_Disp\LCD_1.44.h)(0x5AA2546A)
 I (D:\Keil\Software\ARM\ARMCC\include\stdlib.h)(0x569DEA3A)
 I (.\Member_Disp\GUI_1.44.h)(0x5A797A45)
 F (.\Usr\delay.c)(0x5A797A45)(-c --cpu Cortex-M3 -D__RTX -g -O0 --apcs=interwork --split_sections -I .\Usr -I .\Usr\reWrite -I .\Member_dataTrans -I .\Member_Disp-I E:\My_GTAProject\Project_NetGateway\Software\NWY_zigb&wifi\Code\MBoard\RTE-I E:\My_GTAProject\Project_NetGateway\Software\NWY_zigb&wifi\Code\MBoard\RTE\Device\STM32F103VC-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Driver\Include-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Include-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\RTOS\RTX\INC-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\StdPeriph_Driver\inc-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\RTE_Driver-D__UVISION_VERSION="518" -D_RTE_ -DSTM32F10X_HD-o .\objects\delay.o --omf_browse .\objects\delay.crf --depend .\objects\delay.d)
@@ -52,8 +53,8 @@ I (D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\StdPeriph_Driver\in
 I (Usr\osObjects.h)(0x5A797A45)
 I (D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\RTOS\RTX\INC\cmsis_os.h)(0x5983FFB6)
 I (D:\Keil\Software\ARM\ARMCC\include\stddef.h)(0x569DEA3A)
-F (.\Usr\modDetect.c)(0x5A797A45)(-c --cpu Cortex-M3 -D__RTX -g -O0 --apcs=interwork --split_sections -I .\Usr -I .\Usr\reWrite -I .\Member_dataTrans -I .\Member_Disp-I E:\My_GTAProject\Project_NetGateway\Software\NWY_zigb&wifi\Code\MBoard\RTE-I E:\My_GTAProject\Project_NetGateway\Software\NWY_zigb&wifi\Code\MBoard\RTE\Device\STM32F103VC-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Driver\Include-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Include-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\RTOS\RTX\INC-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\StdPeriph_Driver\inc-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\RTE_Driver-D__UVISION_VERSION="518" -D_RTE_ -DSTM32F10X_HD-o .\objects\moddetect.o --omf_browse .\objects\moddetect.crf --depend .\objects\moddetect.d)
-I (Usr\modDetect.h)(0x5A797A45)
+F (.\Usr\modDetect.c)(0x5AA24AAA)(-c --cpu Cortex-M3 -D__RTX -g -O0 --apcs=interwork --split_sections -I .\Usr -I .\Usr\reWrite -I .\Member_dataTrans -I .\Member_Disp-I E:\My_GTAProject\Project_NetGateway\Software\NWY_zigb&wifi\Code\MBoard\RTE-I E:\My_GTAProject\Project_NetGateway\Software\NWY_zigb&wifi\Code\MBoard\RTE\Device\STM32F103VC-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Driver\Include-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Include-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\RTOS\RTX\INC-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\StdPeriph_Driver\inc-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\RTE_Driver-D__UVISION_VERSION="518" -D_RTE_ -DSTM32F10X_HD-o .\objects\moddetect.o --omf_browse .\objects\moddetect.crf --depend .\objects\moddetect.d)
+I (Usr\modDetect.h)(0x5AA23395)
 I (D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Driver\Include\Driver_USART.h)(0x58AA8AF6)
 I (D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Driver\Include\Driver_Common.h)(0x58AA8AF4)
 I (D:\Keil\Software\ARM\ARMCC\include\stddef.h)(0x569DEA3A)
@@ -80,8 +81,10 @@ I (Usr\osObjects.h)(0x5A797A45)
 I (D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\RTOS\RTX\INC\cmsis_os.h)(0x5983FFB6)
 I (D:\Keil\Software\ARM\ARMCC\include\stdio.h)(0x5A1F6BA0)
 I (D:\Keil\Software\ARM\ARMCC\include\string.h)(0x569DEA3A)
-F (.\Member_dataTrans\UART_dataTransfer.c)(0x5A9E29A7)(-c --cpu Cortex-M3 -D__RTX -g -O0 --apcs=interwork --split_sections -I .\Usr -I .\Usr\reWrite -I .\Member_dataTrans -I .\Member_Disp-I E:\My_GTAProject\Project_NetGateway\Software\NWY_zigb&wifi\Code\MBoard\RTE-I E:\My_GTAProject\Project_NetGateway\Software\NWY_zigb&wifi\Code\MBoard\RTE\Device\STM32F103VC-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Driver\Include-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Include-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\RTOS\RTX\INC-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\StdPeriph_Driver\inc-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\RTE_Driver-D__UVISION_VERSION="518" -D_RTE_ -DSTM32F10X_HD-o .\objects\uart_datatransfer.o --omf_browse .\objects\uart_datatransfer.crf --depend .\objects\uart_datatransfer.d)
-I (Member_dataTrans\UART_dataTransfer.h)(0x5A9D1495)
+I (.\Member_dataTrans\UART_dataTransfer.h)(0x5AA22AB1)
+I (D:\Keil\Software\ARM\ARMCC\include\stdarg.h)(0x569DEA3A)
+F (.\Member_dataTrans\UART_dataTransfer.c)(0x5AA1ED33)(-c --cpu Cortex-M3 -D__RTX -g -O0 --apcs=interwork --split_sections -I .\Usr -I .\Usr\reWrite -I .\Member_dataTrans -I .\Member_Disp-I E:\My_GTAProject\Project_NetGateway\Software\NWY_zigb&wifi\Code\MBoard\RTE-I E:\My_GTAProject\Project_NetGateway\Software\NWY_zigb&wifi\Code\MBoard\RTE\Device\STM32F103VC-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Driver\Include-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Include-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\RTOS\RTX\INC-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\StdPeriph_Driver\inc-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\RTE_Driver-D__UVISION_VERSION="518" -D_RTE_ -DSTM32F10X_HD-o .\objects\uart_datatransfer.o --omf_browse .\objects\uart_datatransfer.crf --depend .\objects\uart_datatransfer.d)
+I (Member_dataTrans\UART_dataTransfer.h)(0x5AA22AB1)
 I (D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Driver\Include\Driver_USART.h)(0x58AA8AF6)
 I (D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Driver\Include\Driver_Common.h)(0x58AA8AF4)
 I (D:\Keil\Software\ARM\ARMCC\include\stddef.h)(0x569DEA3A)
@@ -110,7 +113,7 @@ I (D:\Keil\Software\ARM\ARMCC\include\stdio.h)(0x5A1F6BA0)
 I (D:\Keil\Software\ARM\ARMCC\include\string.h)(0x569DEA3A)
 I (D:\Keil\Software\ARM\ARMCC\include\stdarg.h)(0x569DEA3A)
 F (.\Member_Disp\GUI_1.44.c)(0x5A797A45)(-c --cpu Cortex-M3 -D__RTX -g -O0 --apcs=interwork --split_sections -I .\Usr -I .\Usr\reWrite -I .\Member_dataTrans -I .\Member_Disp-I E:\My_GTAProject\Project_NetGateway\Software\NWY_zigb&wifi\Code\MBoard\RTE-I E:\My_GTAProject\Project_NetGateway\Software\NWY_zigb&wifi\Code\MBoard\RTE\Device\STM32F103VC-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Driver\Include-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Include-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\RTOS\RTX\INC-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\StdPeriph_Driver\inc-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\RTE_Driver-D__UVISION_VERSION="518" -D_RTE_ -DSTM32F10X_HD-o .\objects\gui_1.44.o --omf_browse .\objects\gui_1.44.crf --depend .\objects\gui_1.44.d)
-I (Member_Disp\LCD_1.44.h)(0x5A797A45)
+I (Member_Disp\LCD_1.44.h)(0x5AA2546A)
 I (D:\Keil\Software\ARM\ARMCC\include\stdlib.h)(0x569DEA3A)
 I (D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include\stm32f10x.h)(0x5825386C)
 I (E:\My_GTAProject\Project_NetGateway\Software\NWY_zigb&wifi\Code\MBoard\RTE\RTE_Components.h)(0x5A8977C9)
@@ -141,7 +144,7 @@ I (.\Usr\IO_Map.h)(0x5A797A45)
 I (.\Usr\delay.h)(0x5A797A45)
 I (Member_Disp\FONT_1.44.h)(0x5A797A45)
 F (.\Member_Disp\LCD_1.44.c)(0x5A797A45)(-c --cpu Cortex-M3 -D__RTX -g -O0 --apcs=interwork --split_sections -I .\Usr -I .\Usr\reWrite -I .\Member_dataTrans -I .\Member_Disp-I E:\My_GTAProject\Project_NetGateway\Software\NWY_zigb&wifi\Code\MBoard\RTE-I E:\My_GTAProject\Project_NetGateway\Software\NWY_zigb&wifi\Code\MBoard\RTE\Device\STM32F103VC-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Driver\Include-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Include-I D:\Keil\Software\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\RTOS\RTX\INC-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\StdPeriph_Driver\inc-I D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\RTE_Driver-D__UVISION_VERSION="518" -D_RTE_ -DSTM32F10X_HD-o .\objects\lcd_1.44.o --omf_browse .\objects\lcd_1.44.crf --depend .\objects\lcd_1.44.d)
-I (Member_Disp\LCD_1.44.h)(0x5A797A45)
+I (Member_Disp\LCD_1.44.h)(0x5AA2546A)
 I (D:\Keil\Software\ARM\ARMCC\include\stdlib.h)(0x569DEA3A)
 I (D:\Keil\Software\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include\stm32f10x.h)(0x5825386C)
 I (E:\My_GTAProject\Project_NetGateway\Software\NWY_zigb&wifi\Code\MBoard\RTE\RTE_Components.h)(0x5A8977C9)

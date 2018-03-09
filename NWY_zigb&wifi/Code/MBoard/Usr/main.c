@@ -5,6 +5,7 @@
 #define osObjectsPublic                     // define objects in main module
 #include "osObjects.h"                      // RTOS object definitions
 
+#include "modDetect.h"
 #include "UART_dataTransfer.h"
 #include "LCD_1.44.h"
 
@@ -22,11 +23,11 @@ int main (void) {
 	osMemoryInit();
 	msgQueueInit();
 	
-	communicationActive(comObj_DbugP1);
-	communicationActive(comObj_DbugP2);
-	communicationActive(comObj_DataTransP1);
-	communicationActive(comObj_DataTransP2);
-	communicationActive(comObj_DataTransP3);
+	communicationActive(comObj_DbugP1,ftOBJ_DEBUG);
+//	communicationActive(comObj_DataTransP2,ftOBJ_ZIGB);
+//	communicationActive(comObj_DataTransP3,ftOBJ_WIFI);
+	
+	threadModDetect_Active();
 	
 	LCD144Disp_Active();
 

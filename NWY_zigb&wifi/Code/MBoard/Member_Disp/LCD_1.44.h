@@ -21,7 +21,7 @@ typedef struct
 	uint16_t height;			//LCD 高度
 	uint16_t id;				//LCD ID
 	uint8_t  dir;			//横屏还是竖屏控制：0，竖屏；1，横屏。	
-	uint16_t	 wramcmd;		//开始写gram指令
+	uint16_t  wramcmd;		//开始写gram指令
 	uint16_t  setxcmd;		//设置x坐标指令
 	uint16_t  setycmd;		//设置y坐标指令	 
 }_lcd144_dev; 	
